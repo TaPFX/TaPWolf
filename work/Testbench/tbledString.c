@@ -3,9 +3,9 @@
 #define SIZESETLEDVAL2D 2
 
 int tbledString(int debug, int anz){
-	int i = 0;
+	int i,n = 0;
 	ErrCNT = 0;
-	signed char retinitLEDs, retsetLED, retsetLEDsR,  retsetLEDsG, retsetLEDsB, retsetLEDsW;
+	signed char retinitLEDs, retsetLED, retsetLEDsOFF, retsetLEDsR,  retsetLEDsG, retsetLEDsB, retsetLEDsW;
 	
 	// Array[erwartungswert][funktVariablen 0]..[funktVariablen n]
 	signed char setLEDVal[][SIZESETLEDVAL2D] =	{{0,1},
@@ -57,10 +57,48 @@ int tbledString(int debug, int anz){
 		return -1; }
 	else if(debug){	printf("PASSED %d setLEDsW()\n",retsetLEDsW); usleep(Sleep);}
 	
-	setLEDsOFF();
-
+	retsetLEDsOFF = setLEDsOFF();
+	if(retsetLEDsOFF != 0){
+		printf("ERROR  %d setLEDsOFF() faild\n",retsetLEDsOFF);
+		ErrCNT++;
+		return -1; }
+	else if(debug){	printf("PASSED %d setLEDsOFF()\n",retsetLEDsOFF); usleep(Sleep);}
+	
 	for(i=0;i<anz;i++){
-		setLED(i,0x2F2F2F,50);
+		retsetLED = setLED(i,0x2F2F2F);
+		if(retsetLED != 0){
+			printf("ERROR  %d setLED(%d,%d) faild\n",retsetLED,i,0x2F2F2F);
+			ErrCNT++;
+			return -1; }
+		else if(debug){	printf("PASSED %d setLED(%d,%d)\n",retsetLED,i,0x2F2F2F); usleep(Sleep);}
+	}
+
+	for(n=0;n<anz;n++){
+		for(i=0;i<0xFF;i++){
+			retsetLED = setLED(n,i);
+			if(retsetLED != 0){
+				printf("ERROR  %d setLED(%d,%d) faild\n",retsetLED,n,i);
+				ErrCNT++;
+				return -1; }
+			else if(debug){	printf("PASSED %d setLED(%d,%d)\n",retsetLED,n,i); usleep(10000);}
+		}
+		for(i=0;i<0x2F;i++){
+			retsetLED = setLED(n,i<<8);
+			if(retsetLED != 0){
+				printf("ERROR  %d setLED(%d,%d) faild\n",retsetLED,n,i);
+				ErrCNT++;
+				return -1; }
+			else if(debug){	printf("PASSED %d setLED(%d,%d)\n",retsetLED,n,i); usleep(10000);}
+		}
+		for(i=0;i<0x2F;i++){
+			retsetLED = setLED(n,i<<16);
+			if(retsetLED != 0){
+				printf("ERROR  %d setLED(%d,%d) faild\n",retsetLED,n,i);
+				ErrCNT++;
+				return -1; }
+			else if(debug){	printf("PASSED %d setLED(%d,%d)\n",retsetLED,n,i); usleep(10000);}
+		}
+		
 		usleep(Sleep);
 	}
 

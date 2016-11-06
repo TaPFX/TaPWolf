@@ -8,8 +8,10 @@ int initdone;
 int LEDANZ;
 
 int initLEDs(int anz);
-int setLED(int ledNum, int rgb, int intensety);
+int setLED(int ledNum, int rgb);
+int setBrightness(int brt);
 int setLEDsOFF();
+int setLEDS(int rgb);
 int setLEDsR();
 int serLEDsG();
 int setLEDsB();
