@@ -9,15 +9,16 @@ void *wolfThread(){
 	while(1){	
 		printf("WolfRun\n");
 		usleep(200000);
-		int setLEDS(colors[rand()%3]);
+		setLEDs(color[rand()%3]);
 		pthread_mutex_lock(&mutexRun);
-		if(!WolfRun)
-			break;
+		if(!WolfRun) {
+			pthread_mutex_unlock(&mutexRun);
+			break;}
 		pthread_mutex_unlock(&mutexRun);
 		
 		usleep(1000);
 	}
-	int setLEDsOFF();
+	setLEDsOFF();
 	return;
 }
 
@@ -27,7 +28,7 @@ void *starThread(){
 	while(1){	
 		printf("WolfRun\n");
 		usleep(100000);
-		int setLEDS(colors[rand()%3]);
+		setLEDs(color[rand()%3]);
 		pthread_mutex_lock(&mutexRun);
 		if(!WolfRun)
 			break;
@@ -35,7 +36,7 @@ void *starThread(){
 		
 		usleep(1000);
 	}
-	int setLEDsOFF();
+	setLEDsOFF();
 	return;
 }
 
@@ -48,7 +49,7 @@ int main(int argc, char*argv[]){
 	
 	pthread_t thread1;
 	pthread_mutex_init(&mutexRun, NULL);
-	WolfRun = 0;
+	WolfRun = 1;
 	
 
 	while ((opt = getopt(argc, argv, "p:dh")) != -1) {
@@ -83,7 +84,6 @@ int main(int argc, char*argv[]){
 	
 	if(parseCommand(recvmsg) != 0){
 		printf("ERROR wrong Syntax\n");
-		continue;
 	}
 	
 	rc = pthread_create( &thread1, NULL, &wolfThread, NULL );
@@ -96,8 +96,13 @@ int main(int argc, char*argv[]){
 		bzero(recvmsg, BUFSIZE);
 		printf("wait for Connection\n");
 		waitForClient(recvmsg);
-		
+		if(parseCommand(recvmsg) != 0){
+			printf("ERROR wrong Syntax\n");
+			continue;
+		}
+
 		if(strcmp(Mode, "WolfON") == 0){
+			WolfRun = 1;
 			rc = pthread_create( &thread1, NULL, &wolfThread, NULL );
 			if( rc != 0 ) {
 				printf("Konnte Thread 1 nicht erzeugen\n");
@@ -145,7 +150,7 @@ int parseCommand(char command[BUFSIZE]){
 	
 	
 	splitCommand=strtok(NULL,";");
-	if(strcmp(splitCommand, "ON") == 0 || strcmp(splitCommand, "OFF") == 0)
+	if(strcmp(splitCommand, "WolfON") == 0 || strcmp(splitCommand, "WolfOFF") == 0 || strcmp(splitCommand, "StarON") == 0 || strcmp(splitCommand, "StarOFF") == 0)
 		Mode = splitCommand;
 	else
 		return -1;
