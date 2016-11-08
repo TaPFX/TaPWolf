@@ -1,4 +1,3 @@
-#include <unistd.h>
 #include "TB.h"
 
 extern char *optarg;
@@ -10,7 +9,7 @@ int main(int argc,char* argv[]){
 	int num, rgb, brt;
 	char opt;
 
-	while ((opt = getopt(argc, argv, "e:s:a:")) != -1) {
+	while ((opt = getopt(argc, argv, "e:s:a:w")) != -1) {
 		switch (opt) {
 		case 'e':
 			if(optarg != NULL){
@@ -69,6 +68,10 @@ int main(int argc,char* argv[]){
 			
 			return 0;
 			break;	
+		case 'w':
+			wolfStart();
+			return 0;
+			break;
 		default: /* '?' */
 			printf("Usage: %s [-e] debug(0,1),Sleep(usec),anz(stringsize)  [-s] lednum,rgb(inHEx),brightness \n", argv[0]);
 			return -2;

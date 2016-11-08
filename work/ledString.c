@@ -19,12 +19,11 @@ ws2811_t myledstring =
 							},
 };
 
-initdone = 0;
-LEDANZ = 50;
 
 int initLEDs(int anz){
 	initdone = 0;
-	
+	LEDANZ= 50;
+
 	if(anz > 250 || anz < 1)
 		return -2;
 
