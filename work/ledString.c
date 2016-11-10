@@ -37,6 +37,20 @@ int initLEDs(int anz){
 	return 0;
 }
 
+int getLEDcolor(int ledNum){
+	int i=0;
+	if(initdone == 0)
+		return -1;
+
+	if(ledNum > myledstring.channel[0].count || ledNum < 0 )
+		return -2;
+	
+	return myledstring.channel[0].leds[ledNum];
+
+	return 0;
+}
+
+
 int setLED(int ledNum, int rgb){
 	int i=0;
 	if(initdone == 0)
