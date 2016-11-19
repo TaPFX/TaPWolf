@@ -10,11 +10,13 @@
 #include "ledString.h"
 
 #define DEFAULTPORT 6666
+#define LEDANZ 10
 
 int debug;
 char* Mode;
 
-pthread_mutex_t mutexRun;
+
+pthread_mutex_t mutexRun,mutexStarRun;
 int WolfRun;
 int StarRun;
 

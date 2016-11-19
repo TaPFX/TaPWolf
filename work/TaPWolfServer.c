@@ -4,54 +4,118 @@
 //WolfOFF -> WolfRun=0; Wölfe aus
 
 void *wolfThread(){
-	int color[3] = {0xFF0000,0x00FF00,0x0000FF};
+	int i;
+	int color[3] = {0xFF1F05,0xFF0A00,0xAF0A05};
+	int setcolor;
+	int lednum = 0;
+	int ledcolor = 0;
+	int sleeptime = 1;
+	int sleepmin = 2000000;
+	int sleepmax = 3000000;
+	
+	for(i=0;i<(LEDANZ-1);i=i+2){
+		setcolor = color[rand()%3];
+		setLED(i,setcolor);
+		setLED(i+1,setcolor);
+		printf("led:%d,%d color:%d\n",i,i+1,setcolor);}
+			
 	
 	while(1){	
-		printf("WolfRun\n");
-		usleep(200000);
-		int setLEDS(colors[rand()%3]);
+		while(sleeptime < sleepmin)
+			sleeptime = rand()%sleepmax;
+
+		usleep(sleeptime);
+
+		lednum=rand() % (LEDANZ-1);
+		if(lednum%2 != 0)
+			lednum++;
+		
+		ledcolor = getLEDcolor(lednum);
+		setLED(lednum,0);
+		setLED(lednum+1,0);
+		printf("lednum:%d,%d\n",lednum,lednum+1);
+		usleep(100000);
+		setLED(lednum,ledcolor);
+		setLED(lednum+1,ledcolor);
 		pthread_mutex_lock(&mutexRun);
-		if(!WolfRun)
-			break;
+		if(!WolfRun) {
+			pthread_mutex_unlock(&mutexRun);
+			break;}
 		pthread_mutex_unlock(&mutexRun);
 		
 		usleep(1000);
 	}
-	int setLEDsOFF();
+	setLEDsOFF();
 	return;
 }
 
 void *starThread(){
-	int color[3] = {0xFF0000,0x00FF00,0x0000FF};
+	int i;
+	int color[3] = {0xFFFFA5,0xCFFAFF,0x9FFFFF};
+	int setcolor;
+	int lednum = 0;
+	int ledcolor = 0;
+	int sleeptime = 1;
+	int sleepmin = 2000000;
+	int sleepmax = 3000000;
 	
+	for(i=0;i<(LEDANZ-1);i=i+2){
+		setcolor = color[rand()%3];
+		setLED(i,setcolor);
+		setLED(i+1,setcolor);
+		printf("led:%d,%d color:%d\n",i,i+1,setcolor);}
+			
+/*	
 	while(1){	
-		printf("WolfRun\n");
-		usleep(100000);
-		int setLEDS(colors[rand()%3]);
-		pthread_mutex_lock(&mutexRun);
-		if(!WolfRun)
-			break;
-		pthread_mutex_unlock(&mutexRun);
+		while(sleeptime < sleepmin)
+			sleeptime = rand()%sleepmax;
+
+		usleep(sleeptime);
+
+		lednum=rand() % (LEDANZ-1);
+		if(lednum%2 != 0)
+			lednum++;
 		
-		usleep(1000);
+		ledcolor = getLEDcolor(lednum);
+		setLED(lednum,0);
+		setLED(lednum+1,0);
+		printf("lednum:%d,%d\n",lednum,lednum+1);
+		usleep(100000);
+		setLED(lednum,ledcolor);
+		setLED(lednum+1,ledcolor);
+*/
+	while(1){
+		pthread_mutex_lock(&mutexStarRun);
+		if(!StarRun) {
+			pthread_mutex_unlock(&mutexStarRun);
+			break;}
+		pthread_mutex_unlock(&mutexStarRun);
+		
+		usleep(500000);
 	}
-	int setLEDsOFF();
+	setLEDsOFF();
 	return;
 }
 
 int main(int argc, char*argv[]){
 	int i,rc;
+	int brt=50;
 	int opt;
 	char recvmsg[BUFSIZE];
 	int port = DEFAULTPORT;	
 	int endexit = 1;
 	
-	pthread_t thread1;
+	pthread_t wolfPThread,starPThread;
 	pthread_mutex_init(&mutexRun, NULL);
-	WolfRun = 0;
-	
+	pthread_mutex_init(&mutexStarRun, NULL);
+	WolfRun = 1;
+	StarRun = 1;
 
-	while ((opt = getopt(argc, argv, "p:dh")) != -1) {
+	if(initLEDs(LEDANZ)){
+		printf("ERROR: initLED\n");
+		return -1;}
+		
+	while ((opt = getopt(argc, argv, "p:dhb:")) != -1) {
 		switch (opt) {
 		case 'p':
 			if(optarg != NULL)
@@ -60,6 +124,11 @@ int main(int argc, char*argv[]){
 		case 'd':
 			debug = 1;
 			break;		
+		case 'b':
+			if(optarg != NULL)
+				brt = atoi(optarg);
+			break;		
+	
 		case 'h':
 			printf("Help for TaPWolfServer\n");
 			printf("Usage: %s [-p port number] [-d] debug mode [-h] show Help\n", argv[0]);
@@ -71,36 +140,36 @@ int main(int argc, char*argv[]){
 		}
 	}
 	
+	if(setBrightness(brt)){
+		printf("ERROR setBrightnes\n");
+		return -1;}
+
+	if(setLEDsOFF()){
+		printf("ERROR setLEDsOFF\n");
+		return -1;}
+
+
 	if(initUDPServer(port) != 0){
 		printf("ERROR whil init UDP-Server\n");
 		return -1;
 	}	
 	
-	
-	bzero(recvmsg, BUFSIZE);
-	printf("wait for Connection\n");
-	waitForClient(recvmsg);
-	
-	if(parseCommand(recvmsg) != 0){
-		printf("ERROR wrong Syntax\n");
-		continue;
-	}
-	
-	rc = pthread_create( &thread1, NULL, &wolfThread, NULL );
-	if( rc != 0 ) {
-		printf("Konnte Thread 1 nicht erzeugen\n");
-		return -1;
-	}
-
 	while(!(strcmp(recvmsg,"TaPWolf;exit") == 0)){
+		
 		bzero(recvmsg, BUFSIZE);
 		printf("wait for Connection\n");
 		waitForClient(recvmsg);
 		
+		if(parseCommand(recvmsg) != 0){
+			printf("ERROR wrong Syntax\n");
+			continue;
+		}
+
 		if(strcmp(Mode, "WolfON") == 0){
-			rc = pthread_create( &thread1, NULL, &wolfThread, NULL );
+			WolfRun = 1;
+			rc = pthread_create( &wolfPThread, NULL, &wolfThread, NULL );
 			if( rc != 0 ) {
-				printf("Konnte Thread 1 nicht erzeugen\n");
+				printf("Konnte WolfThread  nicht erzeugen\n");
 				return -1;
 			}
 		}
@@ -110,10 +179,13 @@ int main(int argc, char*argv[]){
 			WolfRun = 0;
 			pthread_mutex_unlock(&mutexRun);}
 			
+		
+		
 		if(strcmp(Mode, "StarON") == 0){
-			rc = pthread_create( &thread1, NULL, &starThread, NULL );
+			StarRun = 1;
+			rc = pthread_create( &starPThread, NULL, &starThread, NULL );
 			if( rc != 0 ) {
-				printf("Konnte Thread 1 nicht erzeugen\n");
+				printf("Konnte StarThread  nicht erzeugen\n");
 				return -1;
 			}
 		}
@@ -124,10 +196,17 @@ int main(int argc, char*argv[]){
 			pthread_mutex_unlock(&mutexRun);}
 			
 	}
-	
+
 	endexit = 0;
 	
-	pthread_join( thread1, NULL );
+	if(setLEDsOFF()){
+		printf("ERROR setLEDsOFF\n");
+		return -1;}
+
+	pthread_join( wolfPThread, NULL );
+	pthread_join( starPThread, NULL );
+
+	ws2811_fini(&myledstring);
 	return 0;
 }
 
@@ -145,7 +224,7 @@ int parseCommand(char command[BUFSIZE]){
 	
 	
 	splitCommand=strtok(NULL,";");
-	if(strcmp(splitCommand, "ON") == 0 || strcmp(splitCommand, "OFF") == 0)
+	if(strcmp(splitCommand, "WolfON") == 0 || strcmp(splitCommand, "WolfOFF") == 0 || strcmp(splitCommand, "StarON") == 0 || strcmp(splitCommand, "StarOFF") == 0 || strcmp(splitCommand, "exit") == 0)
 		Mode = splitCommand;
 	else
 		return -1;
