@@ -10,7 +10,7 @@
 #include "ledString.h"
 
 #define DEFAULTPORT 6666
-#define LEDANZ 10
+#define LEDANZ 36
 
 int debug;
 char* Mode;

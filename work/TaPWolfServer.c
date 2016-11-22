@@ -5,7 +5,7 @@
 
 void *wolfThread(){
 	int i;
-	int color[3] = {0xFF1F05,0xFF0A00,0xAF0A05};
+	int color[3] = {0xFF1F05,0xAF2A00,0xDF3800};
 	int setcolor;
 	int lednum = 0;
 	int ledcolor = 0;
@@ -62,28 +62,10 @@ void *starThread(){
 	for(i=0;i<(LEDANZ-1);i=i+2){
 		setcolor = color[rand()%3];
 		setLED(i,setcolor);
-		setLED(i+1,setcolor);
 		printf("led:%d,%d color:%d\n",i,i+1,setcolor);}
-			
-/*	
-	while(1){	
-		while(sleeptime < sleepmin)
-			sleeptime = rand()%sleepmax;
-
-		usleep(sleeptime);
-
-		lednum=rand() % (LEDANZ-1);
-		if(lednum%2 != 0)
-			lednum++;
-		
-		ledcolor = getLEDcolor(lednum);
-		setLED(lednum,0);
-		setLED(lednum+1,0);
-		printf("lednum:%d,%d\n",lednum,lednum+1);
-		usleep(100000);
-		setLED(lednum,ledcolor);
-		setLED(lednum+1,ledcolor);
-*/
+	
+	setLED(22,0);
+	setLED(8,0);
 	while(1){
 		pthread_mutex_lock(&mutexStarRun);
 		if(!StarRun) {
