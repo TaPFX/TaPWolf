@@ -1,0 +1,9 @@
+Das Programm WolfServer startet bei jedem boot des RaspberryPi automatisch und wartet auf befehle.
+Der Autostart ist durch einen Eintrag in rc.local realisiert.
+
+In der Datei /etc/rc.local folgende Zeile ergänzen:
+/home/pi/TaPWolf/work/WolfServer -p 5555 -b 10 &
+
+-p steht für den Port 5555
+-b steht für die brightnes 10%
+&  schiebt den Prozess in den Hintergrund das der Bootvorgang beendet werden kann.
